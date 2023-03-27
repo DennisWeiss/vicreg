@@ -29,7 +29,7 @@ def get_arguments():
     parser = argparse.ArgumentParser(description="Pretrain a resnet model with VICReg", add_help=False)
 
     # Data
-    parser.add_argument("--data-dir", type=Path, default="/path/to/imagenet", required=True,
+    parser.add_argument("--data-dir", type=Path, default="/path/to/imagenet", required=False,
                         help='Path to the image net dataset')
 
     # Checkpoints
@@ -91,7 +91,8 @@ def main(args):
 
     transforms = aug.TrainTransform()
 
-    dataset = datasets.ImageFolder(args.data_dir / "train", transforms)
+    # dataset = datasets.ImageFolder(args.data_dir / "train", transforms)
+    dataset = datasets.CIFAR10(root='./data', train=True, download=True, transform=transforms)
     sampler = torch.utils.data.distributed.DistributedSampler(dataset, shuffle=True)
     assert args.batch_size % args.world_size == 0
     per_device_batch_size = args.batch_size // args.world_size
