@@ -190,8 +190,8 @@ def main_worker(gpu, args):
         traindir,
         transforms.Compose(
             [
-                transforms.RandomResizedCrop(224),
-                transforms.RandomHorizontalFlip(),
+                # transforms.RandomResizedCrop(32),
+                # transforms.RandomHorizontalFlip(),
                 transforms.ToTensor(),
                 normalize,
             ]
@@ -201,8 +201,8 @@ def main_worker(gpu, args):
         valdir,
         transforms.Compose(
             [
-                transforms.Resize(256),
-                transforms.CenterCrop(224),
+                # transforms.Resize(32),
+                # transforms.CenterCrop(32),
                 transforms.ToTensor(),
                 normalize,
             ]
