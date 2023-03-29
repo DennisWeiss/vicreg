@@ -20,6 +20,7 @@ import torch.distributed as dist
 import torchvision.datasets as datasets
 
 import augmentations as aug
+from datasets import NominalCIFAR10ImageDataset
 from distributed import init_distributed_mode
 
 import resnet
@@ -92,7 +93,7 @@ def main(args):
     transforms = aug.TrainTransform()
 
     # dataset = datasets.ImageFolder(args.data_dir / "train", transforms)
-    dataset = datasets.CIFAR10(root='./data', train=True, download=True, transform=transforms)
+    dataset = NominalCIFAR10ImageDataset(nominal_class=0, transform=transforms)
     # sampler = torch.utils.data.distributed.DistributedSampler(dataset, shuffle=True)
     assert args.batch_size % args.world_size == 0
     per_device_batch_size = args.batch_size // args.world_size
