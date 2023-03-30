@@ -130,7 +130,7 @@ def main(args):
     scaler = torch.cuda.amp.GradScaler()
     for epoch in range(start_epoch, args.epochs):
         # sampler.set_epoch(epoch)
-        for step, x, y in enumerate(loader, start=epoch * len(loader)):
+        for step, (x, y) in enumerate(loader, start=epoch * len(loader)):
             x = x.cuda(gpu, non_blocking=True)
             y = y.cuda(gpu, non_blocking=True)
 
