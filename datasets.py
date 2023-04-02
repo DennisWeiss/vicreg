@@ -52,7 +52,7 @@ class NormalCIFAR10DatasetRotationAugmented(Dataset):
         return 4 * len(self.data)
 
     def __getitem__(self, idx):
-        return self.transform(self.data[idx // 4].rotate(idx % 4 * 90))
+        return self.transform(self.data[idx // 4].rotate(idx % 4 * 90)), 0 if idx % 4 == 0 else 1
 
 
 class AnomalousCIFAR10DatasetRotationAugmented(Dataset):
@@ -67,4 +67,4 @@ class AnomalousCIFAR10DatasetRotationAugmented(Dataset):
         return 4 * len(self.data)
 
     def __getitem__(self, idx):
-        return self.transform(self.data[idx].rotate(idx % 4 * 90))
+        return self.transform(self.data[idx].rotate(idx % 4 * 90)), 0 if idx % 4 == 0 else 1

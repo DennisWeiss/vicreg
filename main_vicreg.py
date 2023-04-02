@@ -32,6 +32,7 @@ def get_arguments():
     # Data
     parser.add_argument("--data-dir", type=Path, default="/path/to/imagenet", required=False,
                         help='Path to the image net dataset')
+    parser.add_argument("--normal-class", type=int, default=0, required=False)
 
     # Checkpoints
     parser.add_argument("--exp-dir", type=Path, default="./exp",
@@ -62,6 +63,8 @@ def get_arguments():
                         help='Variance regularization loss coefficient')
     parser.add_argument("--cov-coeff", type=float, default=1.0,
                         help='Covariance regularization loss coefficient')
+    parser.add_argument("--normal-coeff", type=float, default=25.0)
+    parser.add_argument("--anomalous-coeff", type=float, default=25.0)
 
     # Running
     parser.add_argument("--num-workers", type=int, default=10)
@@ -93,7 +96,7 @@ def main(args):
     transforms = aug.TrainTransform()
 
     # dataset = datasets.ImageFolder(args.data_dir / "train", transforms)
-    dataset = NormalCIFAR10DatasetRotationAugmented(normal_class=0, transform=transforms)
+    dataset = NormalCIFAR10DatasetRotationAugmented(normal_class=args.normal_class, transform=transforms)
     # sampler = torch.utils.data.distributed.DistributedSampler(dataset, shuffle=True)
     assert args.batch_size % args.world_size == 0
     per_device_batch_size = args.batch_size // args.world_size
@@ -130,7 +133,7 @@ def main(args):
     scaler = torch.cuda.amp.GradScaler()
     for epoch in range(start_epoch, args.epochs):
         # sampler.set_epoch(epoch)
-        for step, (x, y) in enumerate(loader, start=epoch * len(loader)):
+        for step, ((x, y), anomalous) in enumerate(loader, start=epoch * len(loader)):
             x = x.cuda(gpu, non_blocking=True)
             y = y.cuda(gpu, non_blocking=True)
 
@@ -138,7 +141,7 @@ def main(args):
 
             optimizer.zero_grad()
             with torch.cuda.amp.autocast():
-                loss = model.forward(x, y)
+                loss = model.forward(x, y, anomalous)
             scaler.scale(loss).backward()
             scaler.step(optimizer)
             scaler.update()
@@ -212,7 +215,7 @@ class VICReg(nn.Module):
             nn.Linear(1024, self.num_features)
         )
 
-    def forward(self, x, y):
+    def forward(self, x, y, anomalous):
         x = self.projector(self.backbone(x))
         y = self.projector(self.backbone(y))
 
@@ -232,11 +235,15 @@ class VICReg(nn.Module):
         cov_loss = off_diagonal(cov_x).pow_(2).sum().div(
             self.num_features
         ) + off_diagonal(cov_y).pow_(2).sum().div(self.num_features)
+        normal_loss = (((1 - anomalous) * x) ** 2).sum() / (1 - anomalous).sum()
+        anomalous_loss = (((anomalous * x) ** -2).sum() / anomalous.sum())
 
         loss = (
             self.args.sim_coeff * repr_loss
             + self.args.std_coeff * std_loss
             + self.args.cov_coeff * cov_loss
+            + self.args.normal_coeff * normal_loss
+            + self.args.anomalous_coeff * anomalous_loss
         )
         return loss
 
