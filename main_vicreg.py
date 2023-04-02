@@ -136,6 +136,7 @@ def main(args):
         for step, ((x, y), anomalous) in enumerate(loader, start=epoch * len(loader)):
             x = x.cuda(gpu, non_blocking=True)
             y = y.cuda(gpu, non_blocking=True)
+            anomalous = anomalous.cuda(gpu, non_blocking=True)
 
             lr = adjust_learning_rate(args, optimizer, loader, step)
 
