@@ -237,7 +237,7 @@ class VICReg(nn.Module):
             self.num_features
         ) + off_diagonal(cov_y).pow_(2).sum().div(self.num_features)
         normal_loss = ((1 - anomalous) * (x ** 2).sum(axis=1)).sum() / (1 - anomalous).sum()
-        anomalous_loss = (anomalous * (x ** -2).sum(axis=1)).sum() / anomalous.sum()
+        anomalous_loss = (anomalous * (1 / (x ** 2 + 0.0001)).sum(axis=1)).sum() / anomalous.sum()
 
         loss = (
             self.args.sim_coeff * repr_loss
