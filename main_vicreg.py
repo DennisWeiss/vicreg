@@ -142,7 +142,7 @@ def main(args):
 
             optimizer.zero_grad()
             with torch.cuda.amp.autocast():
-                loss = model.forward(x, y, anomalous)
+                loss, repr_loss, std_loss, cov_loss, normal_loss, anomalous_loss = model.forward(x, y, anomalous)
             scaler.scale(loss).backward()
             scaler.step(optimizer)
             scaler.update()
@@ -153,6 +153,11 @@ def main(args):
                     epoch=epoch,
                     step=step,
                     loss=loss.item(),
+                    repr_loss=repr_loss.item(),
+                    std_loss=std_loss.item(),
+                    cov_loss=cov_loss.item(),
+                    normal_loss=normal_loss.item(),
+                    anomalous_loss=anomalous_loss.item(),
                     time=int(current_time - start_time),
                     lr=lr,
                 )
@@ -246,7 +251,7 @@ class VICReg(nn.Module):
             + self.args.normal_coeff * normal_loss
             + self.args.anomalous_coeff * anomalous_loss
         )
-        return loss
+        return loss, repr_loss, std_loss, cov_loss, normal_loss, anomalous_loss
 
 
 def Projector(args, embedding):
