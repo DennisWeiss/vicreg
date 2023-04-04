@@ -137,6 +137,7 @@ def main(args):
             x = x.cuda(gpu, non_blocking=True)
             y = y.cuda(gpu, non_blocking=True)
             anomalous = anomalous.cuda(gpu, non_blocking=True)
+            print(x.shape, y.shape, anomalous.shape)
 
             lr = adjust_learning_rate(args, optimizer, loader, step)
 
