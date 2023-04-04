@@ -63,7 +63,7 @@ def get_arguments():
                         help='Variance regularization loss coefficient')
     parser.add_argument("--cov-coeff", type=float, default=1.0,
                         help='Covariance regularization loss coefficient')
-    parser.add_argument("--normal-coeff", type=float, default=25.0)
+    parser.add_argument("--normal-coeff", type=float, default=0.1)
     parser.add_argument("--anomalous-coeff", type=float, default=1e-8)
 
     # Running
