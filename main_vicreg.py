@@ -137,7 +137,6 @@ def main(args):
             x = x.cuda(gpu, non_blocking=True)
             y = y.cuda(gpu, non_blocking=True)
             anomalous = anomalous.cuda(gpu, non_blocking=True)
-            print(x.shape, y.shape, anomalous.shape)
 
             lr = adjust_learning_rate(args, optimizer, loader, step)
 
@@ -252,8 +251,6 @@ class VICReg(nn.Module):
             + self.args.normal_coeff * normal_loss
             + self.args.anomalous_coeff * anomalous_loss
         )
-        print("loss", loss.item(), "repr_loss", repr_loss.item(), "std_loss", std_loss.item(), "cov_loss", cov_loss.item(),
-              "normal_loss", normal_loss.item(), "anomalous_loss", anomalous_loss.item())
         return loss, repr_loss, std_loss, cov_loss, normal_loss, anomalous_loss
 
 
