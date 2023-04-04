@@ -63,8 +63,8 @@ def get_arguments():
                         help='Variance regularization loss coefficient')
     parser.add_argument("--cov-coeff", type=float, default=1.0,
                         help='Covariance regularization loss coefficient')
-    parser.add_argument("--normal-coeff", type=float, default=1)
-    parser.add_argument("--anomalous-coeff", type=float, default=1)
+    parser.add_argument("--normal-coeff", type=float, default=1.0)
+    parser.add_argument("--anomalous-coeff", type=float, default=1.0)
 
     # Running
     parser.add_argument("--num-workers", type=int, default=10)
@@ -242,7 +242,7 @@ class VICReg(nn.Module):
             self.num_features
         ) + off_diagonal(cov_y).pow_(2).sum().div(self.num_features)
         normal_loss = ((1 - anomalous) * (x ** 2).sum(axis=1)).sum() / (1 - anomalous).sum()
-        anomalous_loss = (anomalous * (1 / (x ** 2).sum(axis=1) + 0.0001)).sum() / anomalous.sum()
+        anomalous_loss = -(anomalous * (x ** 2).sum(axis=1)).sum() / anomalous.sum()
 
         loss = (
             self.args.sim_coeff * repr_loss
