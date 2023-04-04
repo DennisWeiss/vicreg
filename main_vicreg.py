@@ -64,7 +64,7 @@ def get_arguments():
     parser.add_argument("--cov-coeff", type=float, default=1.0,
                         help='Covariance regularization loss coefficient')
     parser.add_argument("--normal-coeff", type=float, default=25.0)
-    parser.add_argument("--anomalous-coeff", type=float, default=25.0)
+    parser.add_argument("--anomalous-coeff", type=float, default=1e-8)
 
     # Running
     parser.add_argument("--num-workers", type=int, default=10)
