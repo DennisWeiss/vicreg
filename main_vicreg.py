@@ -241,8 +241,8 @@ class VICReg(nn.Module):
         cov_loss = off_diagonal(cov_x).pow_(2).sum().div(
             self.num_features
         ) + off_diagonal(cov_y).pow_(2).sum().div(self.num_features)
-        normal_loss = ((1 - anomalous) * (x ** 2).sum(axis=1)).sum() / (1 - anomalous).sum()
-        anomalous_loss = (anomalous * (1 / ((x ** 2).sum(axis=1) + 0.0001))).sum() / anomalous.sum()
+        normal_loss = ((1 - anomalous) * (1 / ((x ** 2).sum(axis=1) + 0.0001))).sum() / (1 - anomalous).sum()
+        anomalous_loss = (anomalous * (x ** 2).sum(axis=1)).sum() / anomalous.sum()
 
         loss = (
             self.args.sim_coeff * repr_loss
