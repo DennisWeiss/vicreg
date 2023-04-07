@@ -196,30 +196,37 @@ class VICReg(nn.Module):
     def __init__(self, args):
         super().__init__()
         self.args = args
-        self.num_features = 512
 
-        self.embedding = 512
-
-        self.backbone = nn.Sequential(
-            nn.Conv2d(3, 32, 5, stride=1, padding=2),
-            nn.ReLU(),
-            nn.MaxPool2d(2),
-            nn.Conv2d(32, 64, 5, stride=1, padding=2),
-            nn.ReLU(),
-            nn.MaxPool2d(2),
-            nn.Conv2d(64, 128, 3, stride=1, padding=1),
-            nn.ReLU(),
-            nn.MaxPool2d(2),
-            nn.Flatten(),
-            nn.Linear(128 * 4 * 4, self.embedding),
-            nn.ReLU()
+        self.num_features = int(args.mlp.split("-")[-1])
+        self.backbone, self.embedding = resnet.__dict__[args.arch](
+            zero_init_residual=True
         )
+        self.projector = Projector(args, self.embedding)
 
-        self.projector = nn.Sequential(
-            nn.Linear(self.embedding, 1024),
-            nn.ReLU(),
-            nn.Linear(1024, self.num_features)
-        )
+        # self.num_features = 512
+        #
+        # self.embedding = 512
+        #
+        # self.backbone = nn.Sequential(
+        #     nn.Conv2d(3, 32, 5, stride=1, padding=2),
+        #     nn.ReLU(),
+        #     nn.MaxPool2d(2),
+        #     nn.Conv2d(32, 64, 5, stride=1, padding=2),
+        #     nn.ReLU(),
+        #     nn.MaxPool2d(2),
+        #     nn.Conv2d(64, 128, 3, stride=1, padding=1),
+        #     nn.ReLU(),
+        #     nn.MaxPool2d(2),
+        #     nn.Flatten(),
+        #     nn.Linear(128 * 4 * 4, self.embedding),
+        #     nn.ReLU()
+        # )
+        #
+        # self.projector = nn.Sequential(
+        #     nn.Linear(self.embedding, 1024),
+        #     nn.ReLU(),
+        #     nn.Linear(1024, self.num_features)
+        # )
 
     def forward(self, x, y, anomalous):
         x = self.projector(self.backbone(x))
